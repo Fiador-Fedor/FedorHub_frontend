@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../partials/header"); %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Order</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Order</h1>
+    <form id="update-order-form" action="/order/order/<%= orderId %>/update" method="POST">
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full border border-gray-300 rounded-lg">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="text-left px-4 py-2">Product Name</th>
+              <th class="text-left px-4 py-2">Product ID</th>
+              <th class="text-center px-4 py-2">Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach(product => { %>
+              <tr class="hover:bg-gray-100">
+                <td class="px-4 py-2 text-gray-700"><%= product.title %></td>
+                <td class="px-4 py-2 text-gray-700"><%= product._id %></td>
+                <td class="px-4 py-2 text-center">
+                  <input 
+                    type="number" 
+                    name="products[<%= product._id %>][quantity]" 
+                    value="<%= product.quantity %>" 
+                    min="1" 
+                    required 
+                    class="w-16 p-1 border border-gray-300 rounded focus:ring focus:ring-blue-300"
+                  />
+                  <input 
+                    type="hidden" 
+                    name="products[<%= product._id %>][productId]" 
+                    value="<%= product._id %>" 
+                  />
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex justify-between mt-6">
+        <a href="/order/orders" class="px-4 py-2 bg-gray-300 text-gray-800 rounded shadow hover:bg-gray-400">Back to My Orders</a>
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600">Save Order</button>
+      </div>
+    </form>
+  </div>
+  <%- include("../../partials/footer"); %>
+</body>
+</html>

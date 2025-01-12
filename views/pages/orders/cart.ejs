@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../partials/header"); %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart</title>
+  <script>
+    function updateTotal() {
+      const rows = document.querySelectorAll(".cart-item");
+      let total = 0;
+      rows.forEach(row => {
+        const price = parseFloat(row.dataset.price);
+        const quantity = parseInt(row.querySelector(".quantity").value);
+        total += price * quantity;
+      });
+      document.getElementById("total-price").textContent = `$${total.toFixed(2)}`;
+    }
+
+    // Initial update of total when the page loads
+    window.onload = updateTotal;
+
+    function removeItem(productId) {
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "/order/cart/remove";
+
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "productId";
+      hiddenInput.value = productId;
+
+      form.appendChild(hiddenInput);
+      document.body.appendChild(form);
+      form.submit();
+    }
+  </script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto py-12">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-yellow-500">Shopping Cart</h1>
+    </div>
+
+    <!-- Form -->
+    <form action="/order/checkout" method="POST" class="space-y-6">
+      <!-- Cart Table -->
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full bg-white rounded-lg shadow-md">
+          <thead class="bg-indigo-900 text-yellow-400">
+            <tr>
+              <th class="p-4 text-left">Product</th>
+              <th class="p-4">Price</th>
+              <th class="p-4">Quantity</th>
+              <th class="p-4">Subtotal</th>
+              <th class="p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cart.forEach(item => { %>
+            <tr class="cart-item border-b border-gray-200" data-price="<%= parseFloat(item.price).toFixed(2) %>">
+              <td class="p-4"><%= item.title %></td>
+              <td class="p-4 text-center">$<%= parseFloat(item.price).toFixed(2) %></td>
+              <td class="p-4 text-center">
+                <input
+                  type="number"
+                  name="products[<%= item._id %>][quantity]"
+                  class="quantity w-16 p-2 text-center border border-gray-300 rounded-md"
+                  value="<%= item.quantity %>"
+                  min="1"
+                  max="<%= item.maxQuantity %>"
+                  onchange="updateTotal()"
+                />
+              </td>
+              <td class="p-4 text-center font-bold text-gray-800" id="subtotal-<%= item._id %>">
+                $<%= (item.price * item.quantity).toFixed(2) %>
+              </td>
+              <td class="p-4 text-center">
+                <button
+                  type="button"
+                  class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                  onclick="removeItem('<%= item.productId %>')"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total and Place Order Section -->
+      <div class="bg-white p-6 rounded-lg shadow-md flex flex-wrap justify-between items-center">
+        <h4 class="text-xl font-bold text-indigo-900">Total: <span id="total-price">$0.00</span></h4>
+        <button
+          type="submit"
+          class="px-6 py-3 bg-yellow-500 text-indigo-900 font-bold rounded-lg hover:bg-yellow-400"
+        >
+          Place Order
+        </button>
+      </div>
+    </form>
+
+    <!-- Continue Shopping Button -->
+    <div class="text-center mt-6">
+      <a
+        href="/order/"
+        class="px-6 py-3 bg-indigo-900 text-yellow-400 font-bold rounded-lg hover:bg-indigo-800"
+      >
+        Continue Shopping
+      </a>
+    </div>
+
+    <!-- Navbar/Footer Hiding Script -->
+    <script>
+      if (window.self !== window.top) {
+        document.addEventListener("DOMContentLoaded", () => {
+          document.querySelector('.navbar')?.classList.add('hidden');
+          document.querySelector('footer')?.classList.add('hidden');
+        });
+      }
+    </script>
+  </div>
+
+  <%- include("../../partials/footer"); %>
+</body>
+</html>

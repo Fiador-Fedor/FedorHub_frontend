@@ -1,0 +1,115 @@
+<%- include('../partials/header') %>
+
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md mx-auto">
+    <!-- Card Container -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <!-- Card Header -->
+      <div class="bg-indigo-900 px-6 py-8">
+        <h2 class="text-center text-2xl font-bold text-yellow-400">
+          Login to Your Account
+        </h2>
+      </div>
+
+      <!-- Card Body -->
+      <div class="px-6 py-8">
+        <% if (error) { %>
+          <div class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline"><%= error %></span>
+          </div>
+        <% } %>
+
+        <form action="/user/login" method="POST" class="space-y-6">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700">
+              Username
+            </label>
+            <div class="mt-1">
+              <input
+                type="text"
+                name="username"
+                id="username"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter your username"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <div class="mt-1">
+              <input
+                type="password"
+                name="password"
+                id="password"
+                required
+                class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-900 bg-yellow-400 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200"
+            >
+              Login
+            </button>
+          </div>
+        </form>
+
+        <!-- Links -->
+        <div class="mt-6 text-center space-y-2">
+          <p class="text-sm text-gray-600">
+            Don't have an account? 
+            <a href="/register" class="font-medium text-indigo-600 hover:text-indigo-500">
+              Register here
+            </a>
+          </p>
+          <p class="text-sm">
+            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+              Forgot Password?
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Features Section -->
+    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-900">Secure Login</h3>
+            <p class="mt-1 text-sm text-gray-500">Your data is protected with enterprise-grade security</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-900">Quick Access</h3>
+            <p class="mt-1 text-sm text-gray-500">Fast and easy login to your account</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

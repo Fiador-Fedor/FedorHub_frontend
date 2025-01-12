@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || "FedorHub" %></title>
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Welcome to FedorHub" />
+    <meta property="og:description" content="Your ultimate marketplace for seamless buying and selling. Discover a world of products and services designed just for you!" />
+    <meta property="og:url" content="https://shopflex-ecommerce.vercel.app" />
+    <meta property="og:type" content="website" />
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-gray-50">
+    <nav class="bg-indigo-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <a href="/" class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-yellow-400 hover:text-yellow-300">FedorHub</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden sm:flex sm:items-center">
+                    <div class="flex space-x-4">
+                        <% if (user) { %>
+                            <a href="/home" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                Home
+                            </a>
+                            
+                            <% if (user.role === 'SHOP_OWNER') { %>
+                                <a href="/products/add" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                    Add New Product
+                                </a>
+                                <a href="/categories/" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                    Manage Categories
+                                </a>
+                                <a href="/products" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                    My Products
+                                </a>
+                            <% } else if (user.role === 'USER') { %>
+                                <a href="/order" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                    Shop Now
+                                </a>
+                                <a href="/order/orders" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                    Order History
+                                </a>
+                                <div class="relative">
+                                    <a href="/order/cart" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                                        My Cart
+                                        <span class="ml-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                                            <%= cartCount %>
+                                        </span>
+                                    </a>
+                                </div>
+                            <% } %>
+                            
+                            <a href="/profile" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                My Profile
+                            </a>
+                            <a href="/logout" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                Logout
+                            </a>
+                        <% } else { %>
+                            <a href="/home" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                Home
+                            </a>
+                            <a href="/login" class="text-gray-200 hover:text-yellow-400 px-3 py-2 rounded-md text-sm font-medium">
+                                Sign In
+                            </a>
+                            <a href="/register" class="bg-yellow-400 text-indigo-900 hover:bg-yellow-300 px-4 py-2 rounded-md text-sm font-medium">
+                                Join Now
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-yellow-400 hover:text-yellow-300 hover:bg-indigo-800 focus:outline-none" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <% if (user) { %>
+                    <a href="/home" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                        Home
+                    </a>
+                    
+                    <% if (user.role === 'SHOP_OWNER') { %>
+                        <a href="/products/add" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            Add New Product
+                        </a>
+                        <a href="/categories/" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            Manage Categories
+                        </a>
+                        <a href="/products" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            My Products
+                        </a>
+                    <% } else if (user.role === 'USER') { %>
+                        <a href="/order" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            Shop Now
+                        </a>
+                        <a href="/order/orders" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            Order History
+                        </a>
+                        <a href="/order/cart" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                            My Cart (<%= cartCount %>)
+                        </a>
+                    <% } %>
+                    
+                    <a href="/profile" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                        My Profile
+                    </a>
+                    <a href="/logout" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                        Logout
+                    </a>
+                <% } else { %>
+                    <a href="/home" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                        Home
+                    </a>
+                    <a href="/login" class="text-gray-200 hover:text-yellow-400 block px-3 py-2 rounded-md text-base font-medium">
+                        Sign In
+                    </a>
+                    <a href="/register" class="bg-yellow-400 text-indigo-900 hover:bg-yellow-300 block px-3 py-2 rounded-md text-base font-medium">
+                        Join Now
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('[aria-controls="mobile-menu"]').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

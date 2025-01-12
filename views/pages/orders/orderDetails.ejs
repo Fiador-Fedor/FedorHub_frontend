@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include("../../partials/header"); %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Details</title>
+</head>
+
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg mt-12 p-6">
+    <!-- Order Header -->
+    <div class="bg-blue-900 text-white text-center py-6 rounded-t-lg">
+      <h1 class="text-2xl font-bold">Order Details</h1>
+      <h2 class="text-lg mt-2">Order ID: <%= order._id %></h2>
+    </div>
+
+    <!-- Order Information Section -->
+    <div class="mt-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <h4 class="font-semibold text-gray-700">
+            Status: 
+            <span class="inline-block px-3 py-1 rounded-lg text-white text-sm 
+              <%= order.status === 'Pending' ? 'bg-yellow-500' : 
+                 order.status === 'Shipped' ? 'bg-blue-500' : 
+                 order.status === 'Delivered' ? 'bg-green-500' : 
+                 'bg-red-500' %>">
+              <%= order.status %>
+            </span>
+          </h4>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Total Amount: <span class="text-green-600">$<%= order.totalAmount.toFixed(2) %></span></h4>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Created At: <%= new Date(order.createdAt).toLocaleDateString() %></h4>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-700">Updated At: <%= new Date(order.updatedAt).toLocaleDateString() %></h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Table -->
+    <h3 class="text-xl font-bold text-gray-700 mt-8">Products in this Order:</h3>
+    <table class="w-full mt-4 border-collapse border border-gray-300">
+      <thead class="bg-gray-200 text-gray-700">
+        <tr>
+          <th class="border border-gray-300 px-4 py-2">Product</th>
+          <th class="border border-gray-300 px-4 py-2">Quantity</th>
+          <th class="border border-gray-300 px-4 py-2">Price</th>
+          <th class="border border-gray-300 px-4 py-2">Description</th>
+          <th class="border border-gray-300 px-4 py-2">Image</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% order.products.forEach(product => { %>
+          <tr class="hover:bg-gray-100">
+            <td class="border border-gray-300 px-4 py-2 font-semibold"><%= product.title %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= product.quantity %></td>
+            <td class="border border-gray-300 px-4 py-2">$<%= parseFloat(product.price).toFixed(2) %></td>
+            <td class="border border-gray-300 px-4 py-2"><%= product.description || 'No description available' %></td>
+            <td class="border border-gray-300 px-4 py-2">
+              <% const baseUrl = process.env.API_ORDERS_IMAGE_URL || 'http://localhost:6000'; %>
+              <% if (product.image) { %>
+                <% if (product.image.startsWith('/uploads/')) { %>
+                  <img src="<%= baseUrl %>/images<%= product.image %>" alt="<%= product.title %>" class="w-20 h-20 object-cover rounded">
+                <% } else { %>
+                  <img src="<%= product.image %>" alt="<%= product.title %>" class="w-20 h-20 object-cover rounded">
+                <% } %>
+              <% } else { %>
+                <img src="/images/placeholder.png" alt="No Image Available" class="w-20 h-20 object-cover rounded">
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-center space-x-4 mt-8">
+      <a href="/order/order/<%= order._id %>/edit" class="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-400">Edit Order</a>
+      <form action="/order/order/<%= order._id %>/delete" method="POST" class="inline">
+        <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-400" onclick="return confirm('Are you sure you want to delete this order?')">
+          Delete
+        </button>
+      </form>
+      <a href="/order/orders" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-400">Back to My Orders</a>
+      <% if (order.trackingNumber) { %>
+        <a href="/order/track/<%= order.trackingNumber %>" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-400">Track Shipment</a>
+      <% } %>
+    </div>
+  </div>
+</body>
+
+</html>

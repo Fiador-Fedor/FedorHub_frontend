@@ -1,0 +1,49 @@
+<%- include('../partials/header') %>
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 py-12">
+  <div class="max-w-lg w-full">
+    <!-- Card -->
+    <div class="bg-white rounded-xl shadow-lg border border-indigo-900">
+      <div class="p-6 space-y-6">
+        <!-- Title -->
+        <h3 class="text-center text-2xl font-bold text-yellow-400">
+          <%= message %>
+        </h3>
+
+        <!-- Conditional Logout Message -->
+        <% if (user.role === 'SHOP_OWNER') { %>
+          <p class="text-center text-indigo-900">
+            Are you sure you want to log out of your Shopflex account as the Shop Owner? Logging out will end your session, and you will no longer have access to manage your shop or process orders. If you have unsaved changes or pending orders, please save them before logging out.
+          </p>
+        <% } else if (user.role === 'USER') { %>
+          <p class="text-center text-indigo-900">
+            Are you sure you want to log out of your Shopflex account? Logging out will end your shopping session. If you have items in your cart or pending orders, make sure to complete them before leaving. We hope to see you again soon!
+          </p>
+        <% } %>
+
+        <!-- Buttons for Logout and Cancel -->
+        <div class="flex justify-center gap-4 mt-6">
+          <!-- Logout Form -->
+          <form id="logoutForm" action="/user/logout" method="POST" class="inline-block">
+            <button
+              type="submit"
+              id="confirmLogoutBtn"
+              class="py-2 px-4 text-indigo-900 bg-yellow-400 rounded-lg font-bold hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 shadow transition-colors"
+            >
+              Logout
+            </button>
+          </form>
+          <!-- Cancel Button -->
+          <a
+            href="/"
+            class="py-2 px-4 text-yellow-400 bg-indigo-900 rounded-lg font-bold hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow transition-colors"
+          >
+            Cancel
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

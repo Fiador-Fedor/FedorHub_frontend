@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../partials/header"); %>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details</title>
+  <script>
+    // Detect if the page is loaded in an iframe and hide both the navbar and footer if true
+    if (window.self !== window.top) {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelector('.navbar')?.classList.add('hidden');
+        document.querySelector('footer')?.classList.add('hidden');
+      });
+    }
+  </script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg mt-12 p-6">
+    <!-- Product Header -->
+    <div class="bg-blue-900 text-white text-center py-6 rounded-t-lg">
+      <h1 class="text-2xl font-bold"><%= product.title %></h1>
+      <p class="text-lg"><%= product.category %></p>
+    </div>
+
+    <!-- Product Details Section -->
+    <div class="flex flex-col md:flex-row gap-6 mt-6">
+      <!-- Product Image -->
+      <div class="flex-1">
+        <% var baseUrl = process.env.API_ORDERS_IMAGE_URL || 'http://localhost:6000'; %>
+        <% if (product.image) { %>
+          <% if (product.image.startsWith('/uploads/')) { %>
+            <img src="<%= baseUrl + '/images' + product.image %>" alt="<%= product.title %>" class="rounded-lg shadow-md">
+          <% } else { %>
+            <img src="<%= product.image %>" alt="<%= product.title %>" class="rounded-lg shadow-md">
+          <% } %>
+        <% } else { %>
+          <img src="/images/placeholder.png" alt="No Image Available" class="rounded-lg shadow-md">
+        <% } %>
+      </div>
+
+      <!-- Product Info -->
+      <div class="flex-1">
+        <h3 class="text-2xl font-semibold text-green-600">$<%= product.price.toFixed(2) %></h3>
+        <p class="text-gray-600"><strong>Quantity Available:</strong> <%= product.quantity %></p>
+        <p class="text-gray-600 mt-4"><%= product.description %></p>
+
+        <!-- Add to Cart Form -->
+        <form action="/order/cart" method="POST" class="mt-6">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <input type="hidden" name="title" value="<%= product.title %>">
+          <input type="hidden" name="price" value="<%= product.price %>">
+          <div class="mb-4">
+            <label for="cart-quantity" class="block text-gray-700 font-medium">Quantity</label>
+            <input type="number" name="quantity" id="cart-quantity" class="block w-full border rounded-lg p-2 mt-1" min="1" max="<%= product.quantity %>" value="1" required>
+          </div>
+          <button type="submit" class="w-full bg-yellow-500 text-blue-900 py-2 rounded-lg font-semibold hover:bg-yellow-400">
+            Add to Cart
+          </button>
+        </form>
+
+        <!-- Order Now Form -->
+        <form action="/order/checkout" method="POST" class="mt-6">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <div class="mb-4">
+            <label for="order-quantity" class="block text-gray-700 font-medium">Quantity</label>
+            <input type="number" name="quantity" id="order-quantity" class="block w-full border rounded-lg p-2 mt-1" min="1" max="<%= product.quantity %>" value="1" required>
+          </div>
+          <button type="submit" class="w-full bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800">
+            Order Now
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Back to Products Button -->
+    <div class="mt-8 text-center">
+      <a href="/order/" class="inline-block bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-gray-400">
+        Back to Products
+      </a>
+    </div>
+  </div>
+</body>
+</html>

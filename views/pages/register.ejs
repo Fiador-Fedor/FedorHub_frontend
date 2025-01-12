@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+
+<div class="min-h-screen bg-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full bg-white rounded-lg shadow-lg">
+    <div class="p-6 bg-blue-900 text-yellow-400 rounded-t-lg">
+      <h3 class="text-center text-2xl font-semibold">Create an Account</h3>
+    </div>
+    <div class="p-6">
+      <% if (error) { %>
+        <div class="mb-4 p-3 bg-red-500 text-white rounded-lg">
+          <%= error %>
+        </div>
+      <% } %>
+      <form action="/user/register" method="POST">
+        <!-- Username -->
+        <div class="mb-4">
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <!-- Role -->
+        <div class="mb-4">
+          <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+          <select
+            name="role"
+            id="role"
+            class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="USER">User</option>
+            <option value="SHOP_OWNER">Shop Owner</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+
+        <!-- Register Button -->
+        <button
+          type="submit"
+          class="w-full py-2 px-4 bg-yellow-400 text-blue-900 rounded-lg font-medium hover:bg-yellow-300 transition duration-150"
+        >
+          Register
+        </button>
+      </form>
+
+      <!-- Login Link -->
+      <div class="text-center mt-4">
+        <p class="text-gray-600">
+          Already have an account?
+          <a href="/login" class="text-blue-600 hover:underline">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
