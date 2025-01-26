@@ -13,11 +13,11 @@
         <!-- Conditional Logout Message -->
         <% if (user.role === 'SHOP_OWNER') { %>
           <p class="text-center text-indigo-900">
-            Are you sure you want to log out of your Shopflex account as the Shop Owner? Logging out will end your session, and you will no longer have access to manage your shop or process orders. If you have unsaved changes or pending orders, please save them before logging out.
+            Are you sure you want to log out of your FedorHub account as the Shop Owner? Logging out will terminate your session, and you will lose access to manage your shop and oversee orders. Ensure you save any ongoing work or address pending orders before logging out to avoid disruptions.
           </p>
         <% } else if (user.role === 'USER') { %>
           <p class="text-center text-indigo-900">
-            Are you sure you want to log out of your Shopflex account? Logging out will end your shopping session. If you have items in your cart or pending orders, make sure to complete them before leaving. We hope to see you again soon!
+            Are you sure you want to log out of your FedorHub account? Logging out will end your session. If you have items in your cart or any pending orders, please complete or save them before logging out. We look forward to welcoming you back soon!
           </p>
         <% } %>
 
