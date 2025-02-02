@@ -3,7 +3,6 @@ const axios = require("axios");
 const FormData = require("form-data");
 const router = express.Router();
 const multer = require('multer');
-
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -33,7 +32,6 @@ router.post("/login", async (req, res) => {
     const { username, password } = req.body;
     console.log("Received login request:", { username, password });
 
-    // Send a login request to the authentication service
     const response = await axios.post(`${API_AUTH_URL}/login`, {
       username,
       password,
@@ -41,25 +39,103 @@ router.post("/login", async (req, res) => {
 
     console.log("Authentication service response:", response.data);
 
-    // Extract tokens and user details from the response
     const { accessToken, refreshToken, user } = response.data;
 
-    // Store tokens and user details in the session
     req.session.accessToken = accessToken;
     req.session.refreshToken = refreshToken;
     req.session.user = user;
 
     console.log("Tokens and user details stored successfully in session.");
 
-    // Redirect to the profile page
     res.redirect("/home");
   } catch (error) {
     console.error("Login Error:", error.response?.data || error.message);
-    const errorMessage =
-      error.response?.data?.error || "Login failed. Please try again.";
+    const errorMessage =  error.response?.data?.error || "Login failed. Please try again.";
     res.render("pages/login", { error: errorMessage });
   }
 });
+
+// Add this new route handler for displaying the forgot password page
+router.get("/forgot-password", (req, res) => {
+  res.render("pages/forgot-password", { error: null, success: null });
+});
+
+
+// Forgot Password Handler
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("Received forgot password request for email:", email);
+
+    const response = await axios.post(`${API_AUTH_URL}/forgot-password`, {
+      email,
+    });
+
+    console.log("Password reset email sent successfully");
+    res.render("pages/forgot-password", {
+      success: "Password reset instructions have been sent to your email.",
+    });
+  } catch (error) {
+    console.error("Forgot Password Error:", error.response?.data || error.message);
+    const errorMessage =
+      error.response?.data?.error || "Failed to process password reset request.";
+    res.render("pages/forgot-password", { error: errorMessage });
+  }
+});
+// Reset Password Page Display - Single handler for GET
+router.get("/reset-password", (req, res) => {
+  const { token } = req.query;
+  
+  if (!token) {
+    return res.redirect('/login?message=Invalid password reset link');
+  }
+
+  res.render("pages/reset-password", { 
+    token,
+    error: null,
+    message: req.query.message 
+  });
+});
+
+// Reset Password Submit Handler - Single handler for POST
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+    
+    if (!token) {
+      return res.redirect('/login?message=Invalid password reset request');
+    }
+
+    if (!newPassword || !confirmPassword) {
+      return res.render("pages/reset-password", {
+        token,
+        error: "Both password fields are required"
+      });
+    }
+    
+    if (newPassword !== confirmPassword) {
+      return res.render("pages/reset-password", {
+        token,
+        error: "Passwords do not match"
+      });
+    }
+
+    await axios.post(`${API_AUTH_URL}/reset-password`, {
+      token,
+      newPassword
+    });
+
+    res.redirect("/login?message=Password reset successful. Please login with your new password.");
+
+  } catch (error) {
+    console.error("Reset Password Error:", error.response?.data || error.message);
+    res.render("pages/reset-password", {
+      token,
+      error: error.response?.data?.error || "Failed to reset password. Please try again."
+    });
+  }
+});
+
 
 
 // Edit Profile Handler
@@ -67,32 +143,26 @@ router.post('/edit', upload.single('profileImage'), async (req, res) => {
   try {
     const { accessToken } = req.session;
 
-    // Debugging: Log the access token and user session
     console.log("Access Token:", accessToken);
     console.log("User Session Data:", req.session.user);
 
-    // The profileImage file will now be attached to `req.file`
     const formData = new FormData();
 
-    // Debugging: Log request body
     console.log("Request Body:", req.body);
 
     for (const key in req.body) {
       formData.append(key, req.body[key]);
     }
 
-    // Pass the file data from req.file if provided
     if (req.file) {
-      console.log("File details:", req.file); // Log file details
+      console.log("File details:", req.file);
       formData.append('profileImage', req.file.buffer, req.file.originalname); 
     } else {
       console.log("No file uploaded.");
     }
 
-    // Debugging: Log FormData contents
     console.log("Form Data Contents:", formData);
 
-    // Continue with the Axios request
     const response = await axios.put(`${API_AUTH_URL}/profile/edit`, formData, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -100,14 +170,11 @@ router.post('/edit', upload.single('profileImage'), async (req, res) => {
       },
     });
 
-    // Debugging: Log response from the server
     console.log("Response from API:", response.data);
 
-    // Update session with new user data
     req.session.user = { ...req.session.user, ...response.data.user }; 
     res.redirect('/profile');
   } catch (error) {
-    // Debugging: Log error details
     console.error('Error editing profile:', error.message || error.response?.data);
     
     if (error.response) {
@@ -123,12 +190,9 @@ router.post('/edit', upload.single('profileImage'), async (req, res) => {
   }
 });
 
-
-
 // Logout Handler
 router.post("/logout", async (req, res) => {
   try {
-    // Retrieve the user's ID and refresh token from session
     const refreshToken = req.session.refreshToken;
     const user = req.session.user;
 
@@ -139,7 +203,6 @@ router.post("/logout", async (req, res) => {
 
     console.log("Logging out user:", user.id);
 
-    // Step 1: Send request to revoke the refresh token
     const { data } = await axios.post(`${process.env.API_AUTH_URL}/logout`, {
       userId: user.id,
     });
@@ -151,7 +214,6 @@ router.post("/logout", async (req, res) => {
 
     console.log("Refresh token revoked successfully.");
 
-    // Step 2: Destroy the session and clear tokens and user data
     req.session.destroy((err) => {
       if (err) {
         console.error("Error destroying session:", err);
@@ -161,9 +223,7 @@ router.post("/logout", async (req, res) => {
       }
 
       console.log("Session destroyed successfully.");
-      res.clearCookie("connect.sid"); // Clear session cookie
-
-      // Redirect to login or home page after logout
+      res.clearCookie("connect.sid");
       res.redirect("/login");
     });
   } catch (error) {
