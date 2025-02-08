@@ -416,6 +416,187 @@ router.delete("/order/:id/delete", ensureAuthenticated, async (req, res) => {
   }
 });
 
+// Admin Orders Page
+router.get("/admin/orders", ensureAuthenticated, async (req, res) => {
+  try {
+    const { accessToken, user } = req.session;
+    
+    // Check if user is admin
+    if (user.role !== 'ADMIN') {
+      return res.status(403).send('Access denied');
+    }
 
+    // Fetch all orders using the admin endpoint
+    const ordersResponse = await axios.get(`${API_ORDER_URL}/orders/all`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
+    const orders = ordersResponse.data;
+
+    // Fetch detailed information for each order
+    const enrichedOrders = await Promise.all(orders.map(async (order) => {
+      try {
+        // Get user (customer) details
+        const userResponse = await axios.get(`${process.env.API_AUTH_URL}/users/${order.userId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        // Get product details for each product in the order
+        const productsWithDetails = await Promise.all(order.products.map(async (product) => {
+          try {
+            const productResponse = await axios.get(`${API_ORDER_URL}/products/${product.productId}`, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            return {
+              ...product,
+              details: productResponse.data
+            };
+          } catch (error) {
+            console.error(`Error fetching product ${product.productId}:`, error.message);
+            return {
+              ...product,
+              details: { title: "Unknown Product" }
+            };
+          }
+        }));
+
+        return {
+          ...order,
+          customer: userResponse.data,
+          products: productsWithDetails,
+          productNames: productsWithDetails.map(p => p.details.title)
+        };
+      } catch (error) {
+        console.error(`Error enriching order ${order._id}:`, error.message);
+        return {
+          ...order,
+          customer: { name: "Unknown Customer" },
+          productNames: order.products.map(() => "Unknown Product")
+        };
+      }
+    }));
+
+    res.render("pages/orders/adminOrders", { orders: enrichedOrders });
+  } catch (error) {
+    console.error("Failed to fetch orders:", error.message);
+    res.status(500).render("pages/orders/adminOrders", { 
+      orders: [], 
+      error: "Failed to fetch orders" 
+    });
+  }
+});
+
+// Update Order Status
+router.patch("/:id", ensureAuthenticated, async (req, res) => {
+  try {
+    const { accessToken, user } = req.session;
+    
+    // Check if user is admin
+    if (user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const orderId = req.params.id;
+    const { status } = req.body;
+
+    console.log(`Updating status for order ID: ${orderId} to ${status}`);
+
+    // Call the API to update the order status
+    const response = await axios.patch(
+      `${API_ORDER_URL}/orders/${orderId}`,
+      { status },
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data?.message || "Failed to update order status"
+    });
+  }
+});
+
+// Seller Orders Page
+router.get("/seller/orders", ensureAuthenticated, async (req, res) => {
+  try {
+    const { accessToken, user } = req.session;
+    
+    // Validate user role
+    if (user.role !== 'SHOP_OWNER') {
+      return res.status(403).send('Access denied');
+    }
+
+    // Fetch orders from API
+    const ordersResponse = await axios.get(
+      `${API_ORDER_URL}/orders/seller/orders`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    ).catch(error => {
+      // Handle API errors
+      console.error("API Error:", error.response?.data || error.message);
+      throw new Error("Failed to fetch orders from server");
+    });
+
+    const orders = ordersResponse.data;
+
+    // Process orders only if data exists
+    if (!orders || !Array.isArray(orders)) {
+      throw new Error("Invalid orders data received");
+    }
+
+    // Enrich orders with product details
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        try {
+          const sellerProducts = order.products.filter(p => 
+            p.sellerId === user.user_id.toString()
+          );
+
+          const productsWithDetails = await Promise.all(
+            sellerProducts.map(async (product) => {
+              try {
+                const productResponse = await axios.get(
+                  `${API_ORDER_URL}/products/${product.productId}`,
+                  { headers: { Authorization: `Bearer ${accessToken}` } }
+                );
+                return { ...product, details: productResponse.data };
+              } catch (productError) {
+                console.error(`Product fetch error: ${product.productId}`, productError.message);
+                return { ...product, details: { title: "Unknown Product" } };
+              }
+            })
+          );
+
+          return {
+            ...order,
+            products: productsWithDetails,
+            totalAmount: productsWithDetails.reduce(
+              (sum, p) => sum + (p.details.price * p.quantity), 
+              0
+            )
+          };
+        } catch (orderError) {
+          console.error(`Order processing error: ${order._id}`, orderError.message);
+          return null; // Skip faulty orders
+        }
+      })
+    );
+
+    // Filter out null values from failed order processing
+    const validOrders = enrichedOrders.filter(order => order !== null);
+
+    res.render("pages/orders/sellerOrders", { 
+      orders: validOrders,
+      sellerId: user.user_id 
+    });
+
+  } catch (error) {
+    console.error("Critical error in seller orders route:", error.message);
+    res.status(500).render("pages/orders/sellerOrders", { 
+      orders: [], 
+      error: error.message || "Failed to load orders" 
+    });
+  }
+});
 module.exports = router;

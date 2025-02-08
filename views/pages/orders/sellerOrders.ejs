@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../partials/header"); %>
+  <title>Seller Orders</title>
+  <style>
+    .order-card { transition: transform 0.2s; }
+    .order-card:hover { transform: translateY(-3px); }
+    .seller-product { background-color: #f0f9ff; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-blue-800 mb-6">Your Sales Orders</h1>
+
+    <% if (orders.length > 0) { %>
+      <div class="grid gap-6 grid-cols-1 lg:grid-cols-2">
+        <% orders.forEach(order => { %>
+          <div class="order-card bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Order Header -->
+            <div class="bg-blue-900 text-white p-4">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h2 class="font-semibold">Order #<%= order._id %></h2>
+                  <p class="text-sm mt-1">
+                    <%= new Date(order.createdAt).toLocaleDateString() %>
+                  </p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-sm font-semibold
+                  <%= order.status === 'Pending' ? 'bg-yellow-500' :
+                     order.status === 'Shipped' ? 'bg-blue-500' :
+                     order.status === 'Delivered' ? 'bg-green-500' : 'bg-red-500' %>">
+                  <%= order.status %>
+                </span>
+              </div>
+            </div>
+
+            <!-- Order Content -->
+            <div class="p-4">
+              <!-- Customer Info -->
+              <div class="mb-4">
+                <h3 class="font-semibold text-gray-700">Customer:</h3>
+                <p class="text-gray-600"><%= order.user.profileUrl || 'Anonymous' %></p>
+              </div>
+
+              <!-- Seller Products -->
+              <h3 class="font-semibold text-gray-700 mb-2">Your Products in this Order:</h3>
+              <div class="space-y-3">
+                <% order.products.forEach(product => { %>
+                  <div class="seller-product p-3 rounded-lg">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h4 class="font-medium"><%= product.title %></h4>
+                        <p class="text-sm text-gray-600">
+                          Quantity: <%= product.quantity %> ×
+                          $<%= product.details.price.toFixed(2) %>
+                        </p>
+                      </div>
+                      <span class="font-semibold">
+                        $<%= (product.quantity * product.details.price).toFixed(2) %>
+                      </span>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+
+              <!-- Order Summary -->
+              <div class="mt-4 pt-2 border-t border-gray-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold">Your Total:</span>
+                  <span class="text-lg font-bold text-green-600">
+                    $<%= order.totalAmount.toFixed(2) %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center p-8 bg-white rounded-lg shadow">
+        <p class="text-gray-600 text-lg">
+          No orders containing your products found yet.
+        </p>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include("../../partials/footer"); %>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!-- views/pages/orders/adminOrders.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include("../../partials/header"); %>
+  <title>Admin Order Management</title>
+  <style>
+    .status-select { transition: all 0.3s; }
+    .status-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+    /* Define dynamic status classes */
+    .select-pending { background-color: #f59e0b; color: white; }
+    .select-shipped { background-color: #3b82f6; color: white; }
+    .select-delivered { background-color: #10b981; color: white; }
+    .select-cancelled { background-color: #ef4444; color: white; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold text-blue-800 mb-6">Order Management</h1>
+
+    <% if (orders.length > 0) { %>
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Products</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% orders.forEach(order => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4"><%= order._id %></td>
+                <td class="px-6 py-4">
+                  <% order.products.forEach(product => { %>
+                    <div class="mb-2">
+                      <%= product.title %> × <%= product.quantity %>
+                    </div>
+                  <% }) %>
+                </td>
+                <td class="px-6 py-4">$<%= order.totalAmount.toFixed(2) %></td>
+                <td class="px-6 py-4">
+                  <% 
+                    let statusClass = order.status === 'Pending' ? 'select-pending' : 
+                                      order.status === 'Shipped' ? 'select-shipped' : 
+                                      order.status === 'Delivered' ? 'select-delivered' : 
+                                      'select-cancelled';
+                  %>
+                  <select 
+                    class="status-select px-2 py-1 rounded border focus:outline-none <%= statusClass %>"
+                    data-order-id="<%= order._id %>"
+                    data-original-value="<%= order.status %>"
+                  >
+                    <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                  </select>
+                </td>
+                <td class="px-6 py-4"><%= new Date(order.updatedAt).toLocaleString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-gray-600">No orders found</p>
+    <% } %>
+  </div>
+
+  <script>
+    document.querySelectorAll('.status-select').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const orderId = e.target.dataset.orderId;
+        const newStatus = e.target.value;
+        
+        try {
+          const response = await fetch(`/order/${orderId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus })
+          });
+
+          if (!response.ok) throw new Error('Update failed');
+          
+          // Update the select element's classes based on the new status
+          e.target.classList.remove('select-pending', 'select-shipped', 'select-delivered', 'select-cancelled');
+          if (newStatus === 'Pending') {
+            e.target.classList.add('select-pending');
+          } else if (newStatus === 'Shipped') {
+            e.target.classList.add('select-shipped');
+          } else if (newStatus === 'Delivered') {
+            e.target.classList.add('select-delivered');
+          } else {
+            e.target.classList.add('select-cancelled');
+          }
+          
+          // Refresh the updated time
+          const row = e.target.closest('tr');
+          const timeCell = row.querySelector('td:last-child');
+          timeCell.textContent = new Date().toLocaleString();
+          // Update the data-original-value attribute to match the new status
+          e.target.dataset.originalValue = newStatus;
+        } catch (error) {
+          console.error('Error updating status:', error);
+          alert('Failed to update status');
+          // Reset the select value to the original if update fails
+          e.target.value = e.target.dataset.originalValue;
+        }
+      });
+    });
+  </script>
+
+  <%- include("../../partials/footer"); %>
+</body>
+</html>
