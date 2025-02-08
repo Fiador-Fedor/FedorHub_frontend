@@ -136,17 +136,60 @@ router.post("/cart/remove", ensureAuthenticated, (req, res) => {
   res.redirect("/order/cart");
 });
 
-// Checkout
-router.post("/checkout", ensureAuthenticated, async (req, res) => {  // Ensure authentication here
+// Payment Details Page
+router.get("/payment", ensureAuthenticated, (req, res) => {
+  const cart = req.session.cart || [];
+  if (!cart.length) {
+    return res.redirect("/order/cart");
+  }
+  res.render("pages/orders/payment", { cart });
+});
+
+// Handle form submission from cart page
+router.post("/payment", ensureAuthenticated, (req, res) => {
+  const cart = req.session.cart || [];
+  if (!cart.length) {
+    return res.redirect("/order/cart");
+  }
+  
+  // Update cart quantities if needed
+  if (req.body.products) {
+    cart.forEach(item => {
+      const newQuantity = parseInt(req.body.products[item._id]?.quantity, 10);
+      if (!isNaN(newQuantity) && newQuantity > 0) {
+        item.quantity = newQuantity;
+      }
+    });
+    req.session.cart = cart;
+  }
+  
+  res.redirect("/order/payment");
+});
+
+// Handle checkout from payment page
+router.post("/checkout", ensureAuthenticated, async (req, res) => {
   try {
     const cart = req.session.cart || [];
     const { accessToken } = req.session;
+    const { cardNumber, expiry, cvv, cardholderName } = req.body;
 
-    console.log("Checking out with cart items:", cart);
+    // Validate payment details
+    if (!cardNumber || !expiry || !cvv || !cardholderName) {
+      throw new Error("Missing payment details");
+    }
+
+    console.log("Processing checkout with payment details and cart items:", cart);
 
     const response = await axios.post(
       `${API_ORDER_URL}/orders`,
-      { products: cart },
+      { 
+        products: cart,
+        paymentDetails: {
+          cardNumber: cardNumber.replace(/\s/g, ''),
+          expiry,
+          cardholderName
+        }
+      },
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
@@ -157,7 +200,7 @@ router.post("/checkout", ensureAuthenticated, async (req, res) => {  // Ensure a
     res.redirect("/order/orders");
   } catch (error) {
     console.error("Checkout failed:", error.message);
-    res.status(500).send("Checkout failed");
+    res.redirect("/order/payment?error=Payment failed");
   }
 });
 
